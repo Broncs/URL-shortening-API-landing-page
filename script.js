@@ -6,7 +6,9 @@ const linkText = document.querySelector(".link-input");
 const errorMessage = document.querySelector(".error-message");
 const linkData = document.querySelector("#links");
 
-const baseURL = "https://rel.ink/";
+// https://api.shrtco.de/v2/
+
+const baseURL = "https://api.shrtco.de/v2/";
 
 const openBurguerMenu = () => {
   if (burguerMenu.style.display === "block") {
@@ -19,24 +21,23 @@ const openBurguerMenu = () => {
 };
 
 async function createShortenLink(link) {
-  const response = await fetch(`${baseURL}api/links/`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ url: link }),
-  });
+  linkText.disabled = true;
+  const response = await fetch(`${baseURL}shorten?url=${link}`);
+
   const data = await response.json();
+  if (data) {
+    linkText.disabled = false;
+  }
   showDataIntoDom(data);
 }
 
 const showDataIntoDom = (data) => {
-  if (data.hashid) {
+  if (data.ok) {
     linkData.innerHTML += `<div class="active-links">
    <ul>
-    <li>${data.url}</li>
-    <li><a href="${baseURL}${data.hashid}" target="_blank" >${baseURL}${data.hashid}</a></li>
-    <div><button class="btn btn-copy" data-linkId="${data.hashid}">Copy</button> </div>
+    <li>${data.result.full_short_link}</li>
+    <li><a href="${data.result.full_short_link}" target="_blank" >${data.result.full_short_link}</a></li>
+    <div><button class="btn btn-copy" data-linkId="${data.result.full_short_link}">Copy</button> </div>
     </ul>
     
   </div>`;
@@ -91,7 +92,7 @@ linkData.addEventListener("click", (e) => {
 
   if (e.target.className.includes("btn-copy")) {
     const linkId = e.target.getAttribute("data-linkid");
-    const urlToCopy = `${baseURL}${linkId}`;
+    const urlToCopy = `${linkId}`;
 
     copyText(urlToCopy);
   }
